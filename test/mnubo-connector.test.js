@@ -41,7 +41,13 @@ describe('Connector', function () {
 						client_id : CLIENT_ID,
 						client_secret: CLIENT_SECRET,
 						env : ENV
-					}
+					},
+					devices: [
+                        {
+						    _id: 'Reekoh123',
+                            object_type: 'drink'
+					    }
+                    ]
 				}
 			}, function (error) {
 				should.ifError(error);
@@ -54,27 +60,9 @@ describe('Connector', function () {
 			connector.send({
 				type: 'data',
 				data: {
-					device_id : 'Reekoh112233',
+					device_id : 'Reekoh123',
 					event_type: 'drink'
 				}
-			}, done);
-		});
-	});
-
-	describe('#data', function (done) {
-		it('should process the Array data', function () {
-			connector.send({
-				type: 'data',
-				data: [
-					{
-						device_id: 'Reekoh112233',
-						event_type: 'drink'
-					},
-					{
-						device_id: 'Reekoh112233',
-						event_type: 'drink'
-					}
-				]
 			}, done);
 		});
 	});

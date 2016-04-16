@@ -5,6 +5,7 @@ var platform = require('./platform'),
     isPlainObject = require('lodash.isplainobject'),
     async = require('async'),
     isEmpty = require('lodash.isempty'),
+    authorizedDevices = {},
 	mnuboClient;
 
 let sendData = function(data){
@@ -42,17 +43,62 @@ platform.on('data', function (data) {
         platform.handleException(new Error(`Invalid data received. Data must be a valid Array/JSON Object or a collection of objects. Data: ${data}`));
 });
 
+platform.on('adddevice', function (device) {
+    if (!isEmpty(device) && !isEmpty(device._id)) {
+        authorizedDevices[device._id] = device;
+        platform.log(`Successfully added ${device._id} to the pool of authorized devices.`);
+    }
+    else
+        platform.handleException(new Error(`Device data invalid. Device not added. ${device}`));
+});
+
+platform.on('removedevice', function (device) {
+    if (!isEmpty(device) && !isEmpty(device._id)) {
+        delete authorizedDevices[device._id];
+
+        mnuboClient.objects
+            .delete(device._id)
+            .then(function() {
+                platform.log(`Successfully removed ${device._id} from the pool of authorized devices.`);
+            });
+    }
+    else
+        platform.handleException(new Error(`Device data invalid. Device not removed. ${device}`));
+});
+
 platform.once('close', function () {
     platform.notifyClose();
 });
 
-platform.once('ready', function (options) {
+let createObject = (device) => {
+    mnuboClient.objects
+        .create({
+            x_device_id: device._id,
+            x_object_type: device.object_type
+        })
+        .then(function(object) {
+            platform.log(JSON.stringify({
+                title: 'Object added to Mnubo.',
+                data: object.x_device_id
+            }));
+        });
+};
+
+platform.once('ready', function (options, registeredDevices) {
+    let keyBy = require('lodash.keyby');
 	var mnubo = require('mnubo-sdk');
 
     mnuboClient = new mnubo.Client({
         id: options.client_id,
         secret: options.client_secret,
         env: options.env
+    });
+
+    if (!isEmpty(registeredDevices))
+        authorizedDevices = keyBy(registeredDevices, '_id');
+
+    async.each(registeredDevices, function(datum){
+        createObject(datum);
     });
 
 	platform.notifyReady();
