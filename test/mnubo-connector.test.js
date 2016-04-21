@@ -44,7 +44,7 @@ describe('Connector', function () {
 					},
 					devices: [
                         {
-						    _id: 'Reekoh123',
+						    _id: 'Reekoh12345',
                             object_type: 'drink'
 					    }
                     ]
@@ -60,7 +60,7 @@ describe('Connector', function () {
 			connector.send({
 				type: 'data',
 				data: {
-					device_id : 'Reekoh123',
+					device_id : 'Reekoh12345',
 					event_type: 'drink'
 				}
 			}, done);
