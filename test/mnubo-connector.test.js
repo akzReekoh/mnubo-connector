@@ -41,13 +41,7 @@ describe('Connector', function () {
 						client_id : CLIENT_ID,
 						client_secret: CLIENT_SECRET,
 						env : ENV
-					},
-					devices: [
-                        {
-						    _id: 'Reekoh12345',
-                            object_type: 'drink'
-					    }
-                    ]
+					}
 				}
 			}, function (error) {
 				should.ifError(error);
