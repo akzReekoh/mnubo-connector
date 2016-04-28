@@ -96,22 +96,13 @@ platform.once('close', function () {
     platform.notifyClose();
 });
 
-platform.once('ready', function (options, registeredDevices) {
+platform.once('ready', function (options) {
 	var mnubo = require('mnubo-sdk');
 
     mnuboClient = new mnubo.Client({
         id: options.client_id,
         secret: options.client_secret,
         env: options.env
-    });
-
-    async.each(registeredDevices, function(datum, done){
-        createObject(datum, done);
-    }, (error) => {
-        if(error) {
-            console.error(error);
-            platform.handleException(error);
-        }
     });
 
 	platform.notifyReady();
