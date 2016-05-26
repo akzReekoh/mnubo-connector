@@ -3,6 +3,7 @@
 var get           = require('lodash.get'),
 	async         = require('async'),
 	isArray       = require('lodash.isarray'),
+	isError       = require('lodash.iserror'),
 	platform      = require('./platform'),
 	isPlainObject = require('lodash.isplainobject'),
 	mnuboClient;
@@ -14,6 +15,10 @@ let sendData = function (data, callback) {
 		},
 		'x_event_type': data.event_type || 'data'
 	});
+
+	delete data.device_id;
+	delete data.event_type;
+	delete data.rkh_device_info;
 
 	mnuboClient.events
 		.send([data])
@@ -31,9 +36,13 @@ let sendData = function (data, callback) {
 platform.on('data', function (data) {
 	if (isPlainObject(data)) {
 		sendData(data, (error) => {
-			if (error) {
+			if (error && isError(error)) {
 				console.error(error);
 				platform.handleException(error);
+			}
+			else if (error && !isError(error)) {
+				console.error(error);
+				platform.handleException(new Error(error.message));
 			}
 		});
 	}
@@ -41,9 +50,13 @@ platform.on('data', function (data) {
 		async.each(data, (datum, done) => {
 			sendData(datum, done);
 		}, (error) => {
-			if (error) {
+			if (error && isError(error)) {
 				console.error(error);
 				platform.handleException(error);
+			}
+			else if (error && !isError(error)) {
+				console.error(error);
+				platform.handleException(new Error(error.message));
 			}
 		});
 	}
