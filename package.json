@@ -1,7 +1,7 @@
 {
   "name": "mnubo-connector",
   "description": "Mnubo Connector Plugin the Reekoh IoT Platform.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Reekoh, Inc.",
   "main": "app.js",
   "scripts": {
@@ -25,9 +25,8 @@
   "license": "LGPL-3.0",
   "dependencies": {
     "async": "^1.5.2",
-    "es6-shim": "^0.35.0",
+    "lodash.get": "^4.3.0",
     "lodash.isarray": "^4.0.0",
-    "lodash.isempty": "^4.2.1",
     "lodash.isplainobject": "^4.0.4",
     "mnubo-sdk": "^1.0.4"
   }
