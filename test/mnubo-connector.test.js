@@ -54,27 +54,9 @@ describe('Connector', function () {
 			connector.send({
 				type: 'data',
 				data: {
-					device_id : 'Reekoh112233',
+					device_id : 'Reekoh12345',
 					event_type: 'drink'
 				}
-			}, done);
-		});
-	});
-
-	describe('#data', function (done) {
-		it('should process the Array data', function () {
-			connector.send({
-				type: 'data',
-				data: [
-					{
-						device_id: 'Reekoh112233',
-						event_type: 'drink'
-					},
-					{
-						device_id: 'Reekoh112233',
-						event_type: 'drink'
-					}
-				]
 			}, done);
 		});
 	});
