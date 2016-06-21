@@ -16,6 +16,6 @@
 		"type": "String",
 		"enum": ["sandbox", "production"],
 		"required": true,
-		"help": "Your Mnubo account environment."
+		"help": "Your Mnubo environment."
 	}
 }

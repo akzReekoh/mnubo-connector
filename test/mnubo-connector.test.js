@@ -54,8 +54,9 @@ describe('Connector', function () {
 			connector.send({
 				type: 'data',
 				data: {
-					device_id : 'Reekoh12345',
-					event_type: 'drink'
+					device_id : '87083952-912f-4f6d-bb7b-e75a7361dcb6',
+					event_type: 'data',
+					temp: 36
 				}
 			}, done);
 		});

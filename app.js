@@ -1,109 +1,81 @@
 'use strict';
 
-var platform = require('./platform'),
-    isArray = require('lodash.isarray'),
-    isPlainObject = require('lodash.isplainobject'),
-    async = require('async'),
-    isEmpty = require('lodash.isempty'),
+var get           = require('lodash.get'),
+	async         = require('async'),
+	isArray       = require('lodash.isarray'),
+	isError       = require('lodash.iserror'),
+	platform      = require('./platform'),
+	isPlainObject = require('lodash.isplainobject'),
 	mnuboClient;
 
-let sendData = function(data, callback){
-    if(isEmpty(data.device_id))
-        data.device_id = data.rkh_device_info.id;
+let sendData = function (data, callback) {
+	Object.assign(data, {
+		'x_object': {
+			'x_device_id': data.device_id || get(data, 'rkh_device_info._id')
+		},
+		'x_event_type': data.event_type || 'data'
+	});
 
-    mnuboClient.events
-        .send([{
-            'x_object': {
-                'x_device_id': data.device_id
-            },
-            'x_event_type': data.event_type
-        }])
-        .then(function(data) {
-            platform.log(JSON.stringify({
-                title: 'Data sent to Mnubo.',
-                data: data
-            }));
+	delete data.device_id;
+	delete data.event_type;
+	delete data.rkh_device_info;
 
-            callback();
-        })
-        .catch(function(error){
-            callback(error);
-        });
-};
+	mnuboClient.events
+		.send([data])
+		.then(function (data) {
+			platform.log(JSON.stringify({
+				title: 'Data sent to Mnubo.',
+				data: data
+			}));
 
-let createObject = (device, callback) => {
-    mnuboClient.objects
-        .create({
-            x_device_id: device._id,
-            x_object_type: device.object_type
-        })
-        .then(function(object) {
-            platform.log(JSON.stringify({
-                title: 'Object added to Mnubo.',
-                data: object.x_device_id
-            }));
-        })
-        .catch(function(error){
-            callback(error);
-        });
+			callback();
+		})
+		.catch(callback);
 };
 
 platform.on('data', function (data) {
-    if(isPlainObject(data)){
-        sendData(data, (error) => {
-            if(error) {
-                console.error(error);
-                platform.handleException(error);
-            }
-        });
-    }
-    else if(isArray(data)){
-        async.each(data, (datum, done) => {
-            sendData(datum, done);
-        }, (error) => {
-            if(error) {
-                console.error(error);
-                platform.handleException(error);
-            }
-        });
-    }
-    else
-        platform.handleException(new Error(`Invalid data received. Data must be a valid Array/JSON Object or a collection of objects. Data: ${data}`));
-});
-
-platform.on('adddevice', function (device) {
-    createObject(device, (error) => {
-        if(error) {
-            console.error(error);
-            platform.handleException(error);
-        }
-    });
-});
-
-platform.on('removedevice', function (device) {
-    mnuboClient.objects
-        .delete(device._id)
-        .then(function() {
-            platform.log(`Successfully removed ${device._id} from the pool of authorized devices.`);
-        })
-        .catch(function(error){
-            console.error(error);
-            platform.handleException(error);
-        });
+	if (isPlainObject(data)) {
+		sendData(data, (error) => {
+			if (error && isError(error)) {
+				console.error(error);
+				platform.handleException(error);
+			}
+			else if (error && !isError(error)) {
+				console.error(error);
+				platform.handleException(new Error(error.message));
+			}
+		});
+	}
+	else if (isArray(data)) {
+		async.each(data, (datum, done) => {
+			sendData(datum, done);
+		}, (error) => {
+			if (error && isError(error)) {
+				console.error(error);
+				platform.handleException(error);
+			}
+			else if (error && !isError(error)) {
+				console.error(error);
+				platform.handleException(new Error(error.message));
+			}
+		});
+	}
+	else
+		platform.handleException(new Error(`Invalid data received. Data must be a valid Array/JSON Object or a collection of objects. Data: ${data}`));
 });
 
 platform.once('close', function () {
-    platform.notifyClose();
+	platform.notifyClose();
 });
 
 platform.once('ready', function (options) {
 	var mnubo = require('mnubo-sdk');
 
-    mnuboClient = new mnubo.Client({
-        id: options.client_id,
-        secret: options.client_secret,
-        env: options.env
-    });
+	mnuboClient = new mnubo.Client({
+		id: options.client_id,
+		secret: options.client_secret,
+		env: options.env
+	});
 
 	platform.notifyReady();
 	platform.log('Mnubo Connector has been initialized.');
