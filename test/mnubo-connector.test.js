@@ -1,64 +1,64 @@
-'use strict';
+'use strict'
 
-const CLIENT_ID = 'tPlQIrCvgWQbKtVlwudDhVfHlVecScb4Yp3XxkHglkKoa4iW4W',
-	CLIENT_SECRET = 'dLvvx7rRqfQCBeyhbaWJtAeGu94kwCnjsDedcQB7aM230JvKFW',
-	ENV = 'sandbox';
+const amqp = require('amqplib')
 
-var cp     = require('child_process'),
-	should = require('should'),
-	connector;
+const CLIENT_ID = 'tPlQIrCvgWQbKtVlwudDhVfHlVecScb4Yp3XxkHglkKoa4iW4W'
+const CLIENT_SECRET = 'dLvvx7rRqfQCBeyhbaWJtAeGu94kwCnjsDedcQB7aM230JvKFW'
+const ENV = 'sandbox'
 
-describe('Connector', function () {
-	this.slow(5000);
+let _channel = null
+let _conn = null
+let app = null
 
-	after('terminate child process', function (done) {
-		this.timeout(7000);
-		setTimeout(function(){
-			connector.kill('SIGKILL');
-			done();
-		}, 5000);
-	});
+describe('Mnubo Connector Test', () => {
+  before('init', () => {
+    process.env.ACCOUNT = 'adinglasan'
+    process.env.CONFIG = JSON.stringify({
+      clientId : CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      env : ENV
+    })
+    process.env.INPUT_PIPE = 'ip.mnubo'
+    process.env.LOGGERS = 'logger1, logger2'
+    process.env.EXCEPTION_LOGGERS = 'ex.logger1, ex.logger2'
+    process.env.BROKER = 'amqp://guest:guest@127.0.0.1/'
 
-	describe('#spawn', function () {
-		it('should spawn a child process', function () {
-			should.ok(connector = cp.fork(process.cwd()), 'Child process not spawned.');
-		});
-	});
+    amqp.connect(process.env.BROKER)
+      .then((conn) => {
+        _conn = conn
+        return conn.createChannel()
+      }).then((channel) => {
+      _channel = channel
+    }).catch((err) => {
+      console.log(err)
+    })
+  })
 
-	describe('#handShake', function () {
-		it('should notify the parent process when ready within 5 seconds', function (done) {
-			this.timeout(5000);
+  after('close connection', function (done) {
+    _conn.close()
+    done()
+  })
 
-			connector.on('message', function (message) {
-				if (message.type === 'ready')
-					done();
-			});
+  describe('#start', function () {
+    it('should start the app', function (done) {
+      this.timeout(10000)
+      app = require('../app')
+      app.once('init', done)
+    })
+  })
 
-			connector.send({
-				type: 'ready',
-				data: {
-					options: {
-						client_id : CLIENT_ID,
-						client_secret: CLIENT_SECRET,
-						env : ENV
-					}
-				}
-			}, function (error) {
-				should.ifError(error);
-			});
-		});
-	});
+  describe('#data', () => {
+    it('should send data to third party client', function (done) {
+      this.timeout(15000)
 
-	describe('#data', function (done) {
-		it('should process the JSON data', function () {
-			connector.send({
-				type: 'data',
-				data: {
-					device_id : '87083952-912f-4f6d-bb7b-e75a7361dcb6',
-					event_type: 'data',
-					temp: 36
-				}
-			}, done);
-		});
-	});
-});
+      let data = {
+        deviceId : '87083952-912f-4f6d-bb7b-e75a7361dcb6',
+        eventType: 'data',
+        temp: 36
+      }
+
+      _channel.sendToQueue('ip.mnubo', new Buffer(JSON.stringify(data)))
+      setTimeout(done, 10000)
+    })
+  })
+})

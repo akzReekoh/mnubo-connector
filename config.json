@@ -1,21 +1,23 @@
 {
-	"client_id": {
-		"label": "Client ID",
-		"type": "String",
-		"required": true,
-		"help": "Your Mnubo Client ID."
-	},
-	"client_secret": {
-		"label": "Client Secret",
-		"type": "Password",
-		"required": true,
-		"help": "Your Mnubo Client Secret."
-	},
-	"env": {
-		"label": "Environment",
-		"type": "String",
-		"enum": ["sandbox", "production"],
-		"required": true,
-		"help": "Your Mnubo environment."
-	}
+  "clientId": {
+    "label": "Client ID",
+    "type": "String",
+    "required": true,
+    "help": "Your Mnubo Client ID.",
+    "maxLength": 100
+  },
+  "clientSecret": {
+    "label": "Client Secret",
+    "type": "Password",
+    "required": true,
+    "help": "Your Mnubo Client Secret.",
+    "maxLength": 100
+  },
+  "env": {
+    "label": "Environment",
+    "type": "String",
+    "enum": ["sandbox", "production"],
+    "required": true,
+    "help": "Your Mnubo environment."
+  }
 }
