@@ -21,7 +21,7 @@ These parameters are then injected to the plugin from the platform.
 ## Sample input data
 ```
 {
-    device_id: 'Reekoh112233', //device ID is optional
-    event_type: 'drink'
+    deviceId: 'Reekoh112233', //device ID is optional
+    eventType: 'drink'
 }
 ```
