@@ -1,0 +1,37 @@
+---
+version: 1.0.0 # So we could parse new versions of the manifest without dropping support for older ones. The CLI should be able to parse the YAML file based on the version
+kind: Plugin # We will add other objects that can be uploaded in the registry like: Add-ons, full-blown applications, bots and others TBD
+metadata:
+  name: mnubo-connector
+  description: Mnubo Connector Plugin the Reekoh IoT Platform.
+  documentation: ./README.md
+  icon: ./mnubo.png
+  signupLink:
+  type: Connector
+  price: 0
+  tags:
+    - mnubo
+  config:
+    clientId:
+      label: Client ID
+      type: String
+      required: true
+      help: Your Mnubo Client ID.
+      maxLength: 1000
+    clientSecret:
+      label: Client Secret
+      type: Password
+      required: true
+      help: Your Mnubo Client Secret.
+    env:
+      label: Environment
+      type: String
+      enum:
+      - sandbox
+      - production
+      required: true
+      help: Your Mnubo environment.
+  release:
+    version: 1.0.0
+    notes: path/to/RELEASENOTESv1.0.0.md
+    image: path/to/docker/image
