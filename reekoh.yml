@@ -11,27 +11,27 @@ metadata:
   price: 0
   tags:
     - mnubo
-  config:
-    clientId:
-      label: Client ID
-      type: String
-      required: true
-      help: Your Mnubo Client ID.
-      maxLength: 1000
-    clientSecret:
-      label: Client Secret
-      type: Password
-      required: true
-      help: Your Mnubo Client Secret.
-    env:
-      label: Environment
-      type: String
-      enum:
-      - sandbox
-      - production
-      required: true
-      help: Your Mnubo environment.
   release:
     version: 1.0.0
     notes: path/to/RELEASENOTESv1.0.0.md
     image: path/to/docker/image
+    config:
+        clientId:
+          label: Client ID
+          type: String
+          required: true
+          help: Your Mnubo Client ID.
+          maxLength: 1000
+        clientSecret:
+          label: Client Secret
+          type: Password
+          required: true
+          help: Your Mnubo Client Secret.
+        env:
+          label: Environment
+          type: String
+          enum:
+          - sandbox
+          - production
+          required: true
+          help: Your Mnubo environment.
